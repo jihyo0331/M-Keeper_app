@@ -9,7 +9,7 @@ class Map extends StatelessWidget {
   const Map({super.key});
 
   // This widget is the root of your application.
-  @overrides
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
