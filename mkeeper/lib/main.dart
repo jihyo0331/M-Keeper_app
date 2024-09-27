@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login_page.dart';
+import 'main/main_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +16,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const LoginPage(),  // 앱이 시작되면 LoginPage를 첫 화면으로 설정
+      home: const MainPage(),  // MainPage를 첫 화면으로 설정
     );
   }
 }
