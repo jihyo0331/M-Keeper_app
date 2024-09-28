@@ -10,7 +10,7 @@ class MainPage extends StatelessWidget {
         title: const Text('Main Page'),
       ),
       body: const Center(
-        child: Text('Welcome to Main Page!'),
+        child: Text('main page'),
       ),
     );
   }
@@ -28,7 +28,7 @@ class _MainState extends State<Main> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Main'),
+        title: const Text('main page'),
       ),
       body: const Center(
         child: Text('This is the Main widget.'),
