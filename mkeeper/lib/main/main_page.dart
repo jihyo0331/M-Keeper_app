@@ -27,9 +27,6 @@ class _MainState extends State<Main> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('main page'),
-      ),
       body: const Center(
         child: Text('This is the Main widget.'),
       ),
