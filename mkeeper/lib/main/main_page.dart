@@ -28,7 +28,7 @@ class _MainState extends State<Main> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: const Center(
-        child: Text('This is the Main widget.'),
+        child: Text('main widget'),
       ),
     );
   }
