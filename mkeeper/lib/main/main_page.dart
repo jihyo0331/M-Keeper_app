@@ -7,7 +7,7 @@ class MainPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Main Page'),
+        title: const Text('main Page'),
       ),
       body: const Center(
         child: Text('main page'),
