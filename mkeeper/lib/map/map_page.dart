@@ -13,6 +13,7 @@ class MainPage extends StatelessWidget {
         child: Text('main page'),
       ),
     );
+  }
 }
 
 class Main extends StatefulWidget {
