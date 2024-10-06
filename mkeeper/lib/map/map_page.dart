@@ -14,7 +14,7 @@ class MainPage extends StatelessWidget {
       ),
     );
   }
-}
+
 
 class Main extends StatefulWidget {
   const Main({super.key});
