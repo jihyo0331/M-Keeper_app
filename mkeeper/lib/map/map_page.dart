@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class MainPage extends StatelessWidget {
-  const MainPage({super.key});
+class MapPage extends StatelessWidget {
+  const MapPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -11,24 +11,6 @@ class MainPage extends StatelessWidget {
       ),
       body: const Center(
         child: Text('main page'),
-      ),
-    );
-  }
-}
-
-class Main extends StatefulWidget {
-  const Main({super.key});
-
-  @override
-  _MainState createState() => _MainState(); // createState 오타 수정
-}
-
-class _MainState extends State<Main> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: const Center(
-        child: Text('main widget'),
       ),
     );
   }
