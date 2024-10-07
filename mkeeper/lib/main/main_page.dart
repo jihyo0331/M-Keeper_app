@@ -9,14 +9,29 @@ class MainPage extends StatefulWidget {
   _MainPageState createState() => _MainPageState();
 }
 
+final FlutterTts flutterTts = FlutterTts();
+Future<void> _speak(String text) async {
+  await flutterTts.setLanguage("ko-KR");
+  await flutterTts.setPitch(1.0); // 음성 톤 설정
+  await flutterTts.speak(text);
+}
+
 class _MainPageState extends State<MainPage> {
+  @override
+  void initState() {
+    super.initState();
+    _speak(
+        "안녕하세요 시각장애인 이동권 보장을 위한 적정기술 시스템 앰키퍼 입니다. 화면을 두번 터치하면 조작 화면으로 넘어가실 수 있습니다. 설명을 다시 듣고 싶으시면 화면을 한번 터치해 주세요.");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: GestureDetector(
           onTap: () {
-            // 화면을 탭했을 때 DirectionPage로 이동
+            _speak(
+                "안녕하세요 시각장애인 이동권 보장을 위한 적정기술 시스템 앰키퍼 입니다. 화면을 두번 터치하면 조작 화면으로 넘어가실 수 있습니다. 설명을 다시 듣고 싶으시면 화면을 한번 터치해 주세요.");
           },
           onDoubleTap: () {
             Navigator.push(
@@ -31,8 +46,22 @@ class _MainPageState extends State<MainPage> {
   }
 }
 
-class DirectionPage extends StatelessWidget {
+class DirectionPage extends StatefulWidget {
   const DirectionPage({super.key});
+
+  @override
+  _DirectionPageState createState() => _DirectionPageState();
+}
+
+class _DirectionPageState extends State<DirectionPage> {
+  final FlutterTts flutterTts = FlutterTts();
+
+  @override
+  void initState() {
+    super.initState();
+    _speak(
+        "지금은 조작 페이지 입니다. 해당 화면을 위로 밀면 길찾기, 아래로 밀면 이전 화면으로 돌아가실 수 있습니다. 설명을 다시 듣고 싶으시면 화면을 한번 터치해 주세요.");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,8 +76,15 @@ class DirectionPage extends StatelessWidget {
             );
           } else if (details.primaryVelocity! > 0) {
             // 아래로 스와이프했을 때 (primaryVelocity가 양수일 때)
-            Navigator.pop(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MainPage()),
+            );
           }
+        },
+        onTap: () {
+          _speak(
+              "지금은 조작 페이지 입니다. 해당 페이지에서 화면을 위로 밀면 길찾기, 아래로 밀면 이전 화면으로 돌아가실 수 있습니다. 설명을 다시 듣고 싶으시면 화면을 한번 터치해 주세요.");
         },
         child: Center(
           child: Column(
