@@ -31,7 +31,7 @@ class _MainPageState extends State<MainPage> {
         child: GestureDetector(
           onTap: () {
             _speak(
-                "안녕하세요 시각장애인 이동권 보장을 위한 적정기술 시스템 앰키퍼 입니다. 화면을 두번 터치하면 조작 화면으로 넘어가실 수 있습니다. 설명을 다시 듣고 싶으시면 화면을 한번 터치해 주세요.");
+                "화면을 두번 터치하면 조작 화면으로 넘어가실 수 있습니다. 설명을 다시 듣고 싶으시면 화면을 한번 터치해 주세요.");
           },
           onDoubleTap: () {
             Navigator.push(
@@ -98,11 +98,20 @@ class _DirectionPageState extends State<DirectionPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    margin: const EdgeInsets.only(right: 100.0),
+                    // margin: const EdgeInsets.only(right: 100.0),
                     child: Image.asset('assets/images/icon_Left_m.png'),
                   ),
                   Container(
-                    margin: const EdgeInsets.only(left: 100.0),
+                    child: const Text(
+                      "M-Keeper",
+                      style: TextStyle(
+                        fontSize: 50,
+                        color: Color(0xF1EAF1),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    // margin: const EdgeInsets.only(left: 100.0),
                     child: Image.asset('assets/images/icon_Right_o.png'),
                   ),
                 ],

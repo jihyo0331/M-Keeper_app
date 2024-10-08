@@ -16,18 +16,18 @@ class Login extends StatelessWidget {
   }
 }
 
-class LoginPage extends StatelessWidget{
+class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: ElevatedButton(
-          onPressed: (){
+          onPressed: () {
             //Navigator.push(
-              //context,
-              //MaterialPageRoute(builder: (context) => const MainPage()),
+            //context,
+            //MaterialPageRoute(builder: (context) => const MainPage()),
             //);
           },
           child: const Text('로그인'),
