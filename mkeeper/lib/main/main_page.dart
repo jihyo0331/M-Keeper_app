@@ -80,7 +80,7 @@ class _DirectionPageState extends State<DirectionPage> {
               context,
               MaterialPageRoute(builder: (context) => const MainPage()),
             );
-          }
+          } //뒤로가기
         },
         onTap: () {
           _speak(
