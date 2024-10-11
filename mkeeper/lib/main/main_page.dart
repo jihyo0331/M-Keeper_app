@@ -9,6 +9,7 @@ class MainPage extends StatefulWidget {
   _MainPageState createState() => _MainPageState();
 }
 
+@override
 final FlutterTts flutterTts = FlutterTts();
 Future<void> _speak(String text) async {
   await flutterTts.setLanguage("ko-KR");
