@@ -37,6 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   flutter_tts: ^4.0.2
   speech_to_text: ^7.0.0
+  audioplayers: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -62,11 +63,14 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - assets/audio1.mp3
     - assets/images/logo_mkeeper.png
     - assets/images/icon_Left_m.png
     - assets/images/icon_Right_o.png
     - assets/images/icon_Top_y.png
+    - assets/images/maps.png
     - assets/images/icon_Bottom_b.png
+
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
