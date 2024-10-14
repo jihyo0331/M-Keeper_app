@@ -66,7 +66,12 @@ class _MapPageState extends State<MapPage> {
     return Scaffold(
       body: Center(
         child: GestureDetector(
-          child: Image.asset('assets/images/maps.png'),
+          child: Image.asset(
+            'assets/images/map.png',
+            fit: BoxFit.cover, // 이미지를 화면에 꽉 차게 맞춤
+            width: double.infinity, // 화면 너비에 맞게 조정
+            height: double.infinity, // 화면 높이에 맞게 조정
+          ),
           onTap: () {
             _speak(
                 "이곳은 길찾기 페이지 입니다. 길찾기를 하려면 화면을 길게 누르시고 안내 음성이 나오면 목적지를 말씀해 주세요. 설명을 다시 듣고 싶으시면 화면을 한번 터치해 주세요.");
