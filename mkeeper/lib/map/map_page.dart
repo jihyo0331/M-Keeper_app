@@ -24,12 +24,36 @@ class _MapPageState extends State<MapPage> {
   bool _isListening = false;
   String _recognizedText = '';
   final AudioPlayer _audioPlayer = AudioPlayer();
+  List<List<int>>? map_2d; // 서버에서 받을 2차원 배열
 
   @override
   void initState() {
     super.initState();
     _speak(
         "이곳은 길찾기 페이지 입니다. 길찾기를 하려면 화면을 길게 누르시고, 안내음이 나오면 목적지를 말씀해 주세요. 설명을 다시 듣고 싶으시면 화면을 한번 터치해 주세요.");
+    _fetchMapData(); // 2차원 배열 데이터를 받아오는 함수 호출
+  }
+
+  // 서버로부터 2차원 배열 데이터를 받아오는 함수
+  Future<void> _fetchMapData() async {
+    final url = Uri.parse(
+        'https://e9e2-219-241-108-31.ngrok-free.app/get_array'); // 서버 URL
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          map_2d = List<List<int>>.from(
+            data['array'].map((row) => List<int>.from(row)),
+          );
+        });
+      } else {
+        print('Failed to load map data.');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 
   Future<void> _playGuideVoice() async {
@@ -54,6 +78,7 @@ class _MapPageState extends State<MapPage> {
     if (response.statusCode == 200) {
       // 서버 응답이 성공적인 경우
       print('Destination sent successfully');
+      _fetchMapData(); // 목적지 전송 후 다시 맵 데이터를 받아오기
     } else {
       // 서버 응답이 실패한 경우
       print('Failed to send destination: ${response.statusCode}');
@@ -92,11 +117,17 @@ class _MapPageState extends State<MapPage> {
     return Scaffold(
       body: Center(
         child: GestureDetector(
-          child: Image.asset(
-            'assets/images/map.png',
-            fit: BoxFit.cover, // 이미지를 화면에 꽉 차게 맞춤
-            width: double.infinity, // 화면 너비에 맞게 조정
-            height: double.infinity, // 화면 높이에 맞게 조정
+          child: Center(
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Image.asset(
+                  'assets/images/map.png',
+                  fit: BoxFit.contain, // 이미지를 화면에 맞추기
+                ),
+                if (map_2d != null) _buildPathOverlay(), // 경로가 있을 때 경로만 오버레이
+              ],
+            ),
           ),
           onTap: () {
             _speak(
@@ -117,6 +148,51 @@ class _MapPageState extends State<MapPage> {
             _stopListening(); // 손을 떼면 음성 인식 중지
           },
         ),
+      ),
+    );
+  }
+
+  // 경로를 오버레이로 표시하는 함수 (4인 값만 표시)
+  Widget _buildPathOverlay() {
+    final numRows = map_2d!.length;
+    final numCols = map_2d![0].length;
+    return Transform.translate(
+      offset: const Offset(-12, -15), // x 방향으로 20, y 방향으로 50 이동
+      child: GridView.builder(
+        physics: NeverScrollableScrollPhysics(), // 스크롤 비활성화
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 15, // 한 행에 10개의 셀
+          mainAxisSpacing: 0, // 세로 간격을 0으로 설정
+          crossAxisSpacing: 0, // 가로 간격을 0으로 설정
+          childAspectRatio: 1.0, // 셀의 가로 세로 비율을 1:1로 설정 (정사각형)
+        ),
+        shrinkWrap: true, // 그리드의 크기를 콘텐츠에 맞춤
+        itemCount: numRows * numCols,
+        itemBuilder: (context, index) {
+          final row = index ~/ numCols;
+          final col = index % numCols;
+          final value = map_2d![row][col];
+          return value == 4
+              ? Container(
+                  width: 40, // 사각형의 너비
+                  height: 40, // 사각형의 높이
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 47, 113, 255)
+                        .withOpacity(1), // 경로 색상
+                    shape: BoxShape.rectangle, // 사각형 모양
+                  ),
+                )
+              : value == 2
+                  ? Container(
+                      width: 30, // 동그라미의 너비
+                      height: 30, // 동그라미의 높이
+                      decoration: BoxDecoration(
+                        color: Colors.red, // 시작점의 색상
+                        shape: BoxShape.circle, // 원형으로 설정
+                      ),
+                    )
+                  : Container(); // 다른 값은 투명
+        },
       ),
     );
   }
