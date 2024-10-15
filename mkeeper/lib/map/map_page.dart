@@ -3,6 +3,8 @@ import 'package:mkeeper/main/main_page.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // JSON 변환을 위해 사용
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -35,6 +37,29 @@ class _MapPageState extends State<MapPage> {
     await _audioPlayer.play(AssetSource('audio1.mp3'));
   }
 
+  // 목적지를 서버로 전송하는 함수
+  Future<void> _sendDestination(String destination) async {
+    final url = Uri.parse(
+        'https://e9e2-219-241-108-31.ngrok-free.app/api/destination'); // 서버 URL
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json', // JSON 데이터임을 명시
+      },
+      body: jsonEncode({
+        'destination': destination,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      // 서버 응답이 성공적인 경우
+      print('Destination sent successfully');
+    } else {
+      // 서버 응답이 실패한 경우
+      print('Failed to send destination: ${response.statusCode}');
+    }
+  }
+
   void _startListening() async {
     bool available = await _speechToText.initialize(
       onStatus: (val) => print('onStatus: $val'),
@@ -48,6 +73,7 @@ class _MapPageState extends State<MapPage> {
             _recognizedText = val.recognizedWords;
             if (val.finalResult) {
               _speak('인식된 목적지: $_recognizedText 까지 길안내를 시작합니다.');
+              _sendDestination(_recognizedText); // 인식된 목적지를 서버로 전송
             }
           });
         },
