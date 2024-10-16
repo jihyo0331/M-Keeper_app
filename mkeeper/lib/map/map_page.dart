@@ -115,9 +115,12 @@ class _MapPageState extends State<MapPage> {
     if (response.statusCode == 200) {
       // 서버 응답이 성공적인 경우
       print('Destination sent successfully');
+      _speak('인식된 목적지: $destination 까지 길안내를 시작합니다.'); // 200 응답시에만 음성 피드백
       _fetchMapData(); // 목적지 전송 후 다시 맵 데이터를 받아오기
+    } else if (response.statusCode == 400) {
+      print('Failed to send destination: ${response.statusCode}');
+      _speak('목적지를 잘못 지정하셨습니다. 다시 말씀해 주세요.'); // 잘못된 목적지에 대한 음성 피드백
     } else {
-      // 서버 응답이 실패한 경우
       print('Failed to send destination: ${response.statusCode}');
     }
   }
@@ -134,7 +137,6 @@ class _MapPageState extends State<MapPage> {
           setState(() {
             _recognizedText = val.recognizedWords;
             if (val.finalResult) {
-              _speak('인식된 목적지: $_recognizedText 까지 길안내를 시작합니다.');
               _sendDestination(_recognizedText); // 인식된 목적지를 서버로 전송
             }
           });
