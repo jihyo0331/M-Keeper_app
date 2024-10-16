@@ -5,6 +5,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert'; // JSON 변환을 위해 사용
+import 'dart:async'; // 타이머를 위한 패키지
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -25,19 +26,55 @@ class _MapPageState extends State<MapPage> {
   String _recognizedText = '';
   final AudioPlayer _audioPlayer = AudioPlayer();
   List<List<int>>? map_2d; // 서버에서 받을 2차원 배열
+  Timer? _timer; // 타이머 변수 추가
 
   @override
   void initState() {
     super.initState();
     _speak(
         "이곳은 길찾기 페이지 입니다. 길찾기를 하려면 화면을 길게 누르시고, 안내음이 나오면 목적지를 말씀해 주세요. 설명을 다시 듣고 싶으시면 화면을 한번 터치해 주세요.");
-    _fetchMapData(); // 2차원 배열 데이터를 받아오는 함수 호출
+    _fetchMapData(); // 초기 데이터를 받아오기
+    _startFetchingData(); // 1초마다 데이터 받아오는 함수 호출
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // 타이머가 있으면 해제
+    super.dispose();
+  }
+
+  // 1초마다 데이터를 받아오는 함수
+  void _startFetchingData() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      _fetchMapData(); // 1초마다 데이터 갱신
+    });
   }
 
   // 서버로부터 2차원 배열 데이터를 받아오는 함수
   Future<void> _fetchMapData() async {
     final url = Uri.parse(
         'https://e9e2-219-241-108-31.ngrok-free.app/get_array'); // 서버 URL
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          map_2d = List<List<int>>.from(
+            data['array'].map((row) => List<int>.from(row)),
+          );
+        });
+      } else {
+        print('Failed to load map data.');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  Future<void> _resetMapData() async {
+    final url =
+        Uri.parse('https://e9e2-219-241-108-31.ngrok-free.app/get_resetmap');
     try {
       final response = await http.get(url);
 
@@ -140,6 +177,7 @@ class _MapPageState extends State<MapPage> {
             );
           },
           onLongPressStart: (_) {
+            _resetMapData(); // 지도를 초기화
             _playGuideVoice();
             _startListening(); // 음성 인식 시작
           },
@@ -161,7 +199,7 @@ class _MapPageState extends State<MapPage> {
       child: GridView.builder(
         physics: NeverScrollableScrollPhysics(), // 스크롤 비활성화
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 15, // 한 행에 10개의 셀
+          crossAxisCount: 15, // 한 행에 15개의 셀
           mainAxisSpacing: 0, // 세로 간격을 0으로 설정
           crossAxisSpacing: 0, // 가로 간격을 0으로 설정
           childAspectRatio: 1.0, // 셀의 가로 세로 비율을 1:1로 설정 (정사각형)
