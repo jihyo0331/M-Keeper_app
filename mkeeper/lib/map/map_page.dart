@@ -39,7 +39,7 @@ class _MapPageState extends State<MapPage> {
 
   @override
   void dispose() {
-    _timer?.cancel(); // 타이머가 있으면 해제
+    _timer?.cancel(); // 타이머 해제
     super.dispose();
   }
 
@@ -50,7 +50,7 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
-  // 서버로부터 2차원 배열 데이터를 받아오는 함수
+  // 서버로부터 맵 받아오는 함수
   Future<void> _fetchMapData() async {
     final url = Uri.parse(
         'https://e9e2-219-241-108-31.ngrok-free.app/get_array'); // 서버 URL
@@ -98,7 +98,7 @@ class _MapPageState extends State<MapPage> {
     await _audioPlayer.play(AssetSource('audio1.mp3'));
   }
 
-  // 목적지를 서버로 전송하는 함수
+//목적지 전송
   Future<void> _sendDestination(String destination) async {
     final url = Uri.parse(
         'https://e9e2-219-241-108-31.ngrok-free.app/api/destination'); // 서버 URL
