@@ -40,7 +40,23 @@ class _MainPageState extends State<MainPage> {
               MaterialPageRoute(builder: (context) => const DirectionPage()),
             );
           },
-          child: Image.asset('assets/images/logo_mkeeper.png'),
+          child: Center(
+            child: Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 300.0),
+                ),
+                Image.asset('assets/images/logo_mkeeper.png'),
+                const Text(
+                  "M-Keeper",
+                  style: TextStyle(
+                    fontSize: 60,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              ],
+            ),
+          ),
         ),
       ),
     );

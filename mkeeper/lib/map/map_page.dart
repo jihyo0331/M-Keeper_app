@@ -52,8 +52,7 @@ class _MapPageState extends State<MapPage> {
 
   // 서버로부터 맵 받아오는 함수
   Future<void> _fetchMapData() async {
-    final url = Uri.parse(
-        'https://e9e2-219-241-108-31.ngrok-free.app/get_array'); // 서버 URL
+    final url = Uri.parse('https://mkeeper.ngrok.app/get_array'); // 서버 URL
     try {
       final response = await http.get(url);
 
@@ -73,8 +72,7 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> _resetMapData() async {
-    final url =
-        Uri.parse('https://e9e2-219-241-108-31.ngrok-free.app/get_resetmap');
+    final url = Uri.parse('https://mkeeper.ngrok.app/get_resetmap');
     try {
       final response = await http.get(url);
 
@@ -100,8 +98,8 @@ class _MapPageState extends State<MapPage> {
 
 //목적지 전송
   Future<void> _sendDestination(String destination) async {
-    final url = Uri.parse(
-        'https://e9e2-219-241-108-31.ngrok-free.app/api/destination'); // 서버 URL
+    final url =
+        Uri.parse('https://mkeeper.ngrok.app/api/destination'); // 서버 URL
     final response = await http.post(
       url,
       headers: {
