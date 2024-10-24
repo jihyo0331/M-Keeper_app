@@ -4,8 +4,8 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert'; // JSON 변환을 위해 사용
-import 'dart:async'; // 타이머를 위한 패키지
+import 'dart:convert';
+import 'dart:async';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -16,7 +16,7 @@ class MapPage extends StatefulWidget {
 final FlutterTts flutterTts = FlutterTts();
 Future<void> _speak(String text) async {
   await flutterTts.setLanguage("ko-KR");
-  await flutterTts.setPitch(1.0); // 음성 톤 설정
+  await flutterTts.setPitch(1.0);
   await flutterTts.speak(text);
 }
 
@@ -25,34 +25,63 @@ class _MapPageState extends State<MapPage> {
   bool _isListening = false;
   String _recognizedText = '';
   final AudioPlayer _audioPlayer = AudioPlayer();
-  List<List<int>>? map_2d; // 서버에서 받을 2차원 배열
-  Timer? _timer; // 타이머 변수 추가
+  List<List<int>>? map_2d;
+  Timer? _timer;
+  Timer? _statusCheckTimer; // 추가된 타이머
 
   @override
   void initState() {
     super.initState();
     _speak(
         "이곳은 길찾기 페이지 입니다. 길찾기를 하려면 화면을 길게 누르시고, 안내음이 나오면 목적지를 말씀해 주세요. 설명을 다시 듣고 싶으시면 화면을 한번 터치해 주세요.");
-    _fetchMapData(); // 초기 데이터를 받아오기
-    _startFetchingData(); // 1초마다 데이터 받아오는 함수 호출
+    _fetchMapData();
+    _startFetchingData();
+    _startCheckingPauseStatus(); // 추가된 함수 호출
   }
 
   @override
   void dispose() {
-    _timer?.cancel(); // 타이머 해제
+    _timer?.cancel();
+    _statusCheckTimer?.cancel(); // 타이머 해제
     super.dispose();
   }
 
-  // 1초마다 데이터를 받아오는 함수
   void _startFetchingData() {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      _fetchMapData(); // 1초마다 데이터 갱신
+      _fetchMapData();
     });
   }
 
-  // 서버로부터 맵 받아오는 함수
+  void _startCheckingPauseStatus() {
+    _statusCheckTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
+      await _checkPauseStatus(); // 1초마다 상태를 확인
+    });
+  }
+
+  Future<void> _checkPauseStatus() async {
+    final url = Uri.parse('https://mkeeper.ngrok.app/get_pause_status');
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final pauseFlag = data['flag'];
+        final pause = data['pause'];
+        final end = data['end'];
+
+        print("Pause Status: flag=$pauseFlag, pause=$pause, end=$end");
+
+        // 상황에 맞게 상태 처리 (예: 일시 정지 상태라면 안내 음성을 추가로 말하는 등)
+      } else {
+        print('Failed to load pause status.');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
   Future<void> _fetchMapData() async {
-    final url = Uri.parse('https://mkeeper.ngrok.app/get_array'); // 서버 URL
+    final url = Uri.parse('https://mkeeper.ngrok.app/get_array');
     try {
       final response = await http.get(url);
 
@@ -92,35 +121,22 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> _playGuideVoice() async {
-    // 로컬에 있는 MP3 파일 경로를 지정하여 재생
     await _audioPlayer.play(AssetSource('audio1.mp3'));
   }
 
-//목적지 전송
   Future<void> _sendDestination(String destination) async {
-    final url =
-        Uri.parse('https://mkeeper.ngrok.app/api/destination'); // 서버 URL
+    final url = Uri.parse('https://mkeeper.ngrok.app/api/destination');
     final response = await http.post(
       url,
       headers: {
-        'Content-Type': 'application/json', // JSON 데이터임을 명시
+        'Content-Type': 'application/json',
       },
       body: jsonEncode({
         'destination': destination,
       }),
     );
-
-    if (response.statusCode == 200) {
-      // 서버 응답이 성공적인 경우
-      print('Destination sent successfully');
-      _speak('인식된 목적지: $destination 까지 길안내를 시작합니다.'); // 200 응답시에만 음성 피드백
-      _fetchMapData(); // 목적지 전송 후 다시 맵 데이터를 받아오기
-    } else if (response.statusCode == 400) {
-      print('Failed to send destination: ${response.statusCode}');
-      _speak('목적지를 잘못 지정하셨습니다. 다시 말씀해 주세요.'); // 잘못된 목적지에 대한 음성 피드백
-    } else {
-      print('Failed to send destination: ${response.statusCode}');
-    }
+    _speak('$destination 까지 길안내를 시작합니다.');
+    _fetchMapData();
   }
 
   void _startListening() async {
@@ -135,11 +151,11 @@ class _MapPageState extends State<MapPage> {
           setState(() {
             _recognizedText = val.recognizedWords;
             if (val.finalResult) {
-              _sendDestination(_recognizedText); // 인식된 목적지를 서버로 전송
+              _sendDestination(_recognizedText);
             }
           });
         },
-        localeId: 'ko_KR', // 한국어 인식
+        localeId: 'ko_KR',
       );
     }
   }
@@ -160,9 +176,9 @@ class _MapPageState extends State<MapPage> {
               children: [
                 Image.asset(
                   'assets/images/map.png',
-                  fit: BoxFit.contain, // 이미지를 화면에 맞추기
+                  fit: BoxFit.contain,
                 ),
-                if (map_2d != null) _buildPathOverlay(), // 경로가 있을 때 경로만 오버레이
+                if (map_2d != null) _buildPathOverlay(),
               ],
             ),
           ),
@@ -177,34 +193,33 @@ class _MapPageState extends State<MapPage> {
             );
           },
           onLongPressStart: (_) {
-            _resetMapData(); // 지도를 초기화
+            _resetMapData();
             _playGuideVoice();
-            _startListening(); // 음성 인식 시작
+            _startListening();
           },
           onLongPressEnd: (_) {
             _playGuideVoice();
-            _stopListening(); // 손을 떼면 음성 인식 중지
+            _stopListening();
           },
         ),
       ),
     );
   }
 
-  // 경로를 오버레이로 표시하는 함수 (4인 값만 표시)
   Widget _buildPathOverlay() {
     final numRows = map_2d!.length;
     final numCols = map_2d![0].length;
     return Transform.translate(
-      offset: const Offset(-12, -15), // x 방향으로 20, y 방향으로 50 이동
+      offset: const Offset(-12, -15),
       child: GridView.builder(
-        physics: NeverScrollableScrollPhysics(), // 스크롤 비활성화
+        physics: NeverScrollableScrollPhysics(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 15, // 한 행에 15개의 셀
-          mainAxisSpacing: 0, // 세로 간격을 0으로 설정
-          crossAxisSpacing: 0, // 가로 간격을 0으로 설정
-          childAspectRatio: 1.0, // 셀의 가로 세로 비율을 1:1로 설정 (정사각형)
+          crossAxisCount: 15,
+          mainAxisSpacing: 0,
+          crossAxisSpacing: 0,
+          childAspectRatio: 1.0,
         ),
-        shrinkWrap: true, // 그리드의 크기를 콘텐츠에 맞춤
+        shrinkWrap: true,
         itemCount: numRows * numCols,
         itemBuilder: (context, index) {
           final row = index ~/ numCols;
@@ -212,24 +227,24 @@ class _MapPageState extends State<MapPage> {
           final value = map_2d![row][col];
           return value == 4
               ? Container(
-                  width: 40, // 사각형의 너비
-                  height: 40, // 사각형의 높이
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 47, 113, 255)
-                        .withOpacity(1), // 경로 색상
-                    shape: BoxShape.rectangle, // 사각형 모양
+                    color:
+                        const Color.fromARGB(255, 47, 113, 255).withOpacity(1),
+                    shape: BoxShape.rectangle,
                   ),
                 )
               : value == 2
                   ? Container(
-                      width: 30, // 동그라미의 너비
-                      height: 30, // 동그라미의 높이
+                      width: 30,
+                      height: 30,
                       decoration: BoxDecoration(
-                        color: Colors.red, // 시작점의 색상
-                        shape: BoxShape.circle, // 원형으로 설정
+                        color: Colors.red,
+                        shape: BoxShape.circle,
                       ),
                     )
-                  : Container(); // 다른 값은 투명
+                  : Container();
         },
       ),
     );

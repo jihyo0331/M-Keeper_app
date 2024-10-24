@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MainPage(), // MainPage를 첫 화면으로 설정
+      home: const MainPage(), 
     );
   }
 }

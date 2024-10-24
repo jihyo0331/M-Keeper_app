@@ -13,7 +13,7 @@ class MainPage extends StatefulWidget {
 final FlutterTts flutterTts = FlutterTts();
 Future<void> _speak(String text) async {
   await flutterTts.setLanguage("ko-KR");
-  await flutterTts.setPitch(1.0); // 음성 톤 설정
+  await flutterTts.setPitch(1.0);
   await flutterTts.speak(text);
 }
 
@@ -53,7 +53,8 @@ class _MainPageState extends State<MainPage> {
                     fontSize: 60,
                     fontWeight: FontWeight.bold,
                   ),
-                )
+                ),
+                // 추가할 이미지
               ],
             ),
           ),
@@ -70,14 +71,51 @@ class DirectionPage extends StatefulWidget {
   _DirectionPageState createState() => _DirectionPageState();
 }
 
-class _DirectionPageState extends State<DirectionPage> {
+class _DirectionPageState extends State<DirectionPage>
+    with SingleTickerProviderStateMixin {
   final FlutterTts flutterTts = FlutterTts();
+  late AnimationController _animationController;
+  late Animation<double> _opacityAnimation1;
+  late Animation<double> _opacityAnimation2;
+  late Animation<double> _opacityAnimation3;
+  late Animation<Offset> _positionAnimation;
 
   @override
   void initState() {
     super.initState();
     _speak(
         "지금은 조작 페이지 입니다. 해당 화면을 위로 밀면 길찾기, 아래로 밀면 이전 화면으로 돌아가실 수 있습니다. 설명을 다시 듣고 싶으시면 화면을 한번 터치해 주세요.");
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+
+    _opacityAnimation1 =
+        Tween<double>(begin: 1.0, end: 0.0).animate(_animationController);
+    _opacityAnimation2 =
+        Tween<double>(begin: 0.8, end: 0.0).animate(_animationController);
+    _opacityAnimation3 =
+        Tween<double>(begin: 0.6, end: 0.0).animate(_animationController);
+
+    _positionAnimation =
+        Tween<Offset>(begin: Offset(0, 2), end: Offset(0, -1.0))
+            .animate(_animationController);
+
+    _animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _animationController.reset();
+        _animationController.forward();
+      }
+    });
+
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -86,18 +124,16 @@ class _DirectionPageState extends State<DirectionPage> {
       body: GestureDetector(
         onVerticalDragEnd: (details) {
           if (details.primaryVelocity! < 0) {
-            // 위로 스와이프했을 때 (primaryVelocity가 음수일 때)
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const MapPage()),
             );
           } else if (details.primaryVelocity! > 0) {
-            // 아래로 스와이프했을 때 (primaryVelocity가 양수일 때)
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const MainPage()),
             );
-          } //뒤로가기
+          }
         },
         onTap: () {
           _speak(
@@ -108,27 +144,45 @@ class _DirectionPageState extends State<DirectionPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                margin: const EdgeInsets.only(bottom: 200.0),
+                margin: const EdgeInsets.only(bottom: 100.0),
                 child: Image.asset('assets/images/icon_Top_y.png'),
+              ),
+              SlideTransition(
+                position: _positionAnimation,
+                child: Column(
+                  children: [
+                    FadeTransition(
+                      opacity: _opacityAnimation1,
+                      child: Image.asset(
+                          'assets/images/arrow.png'), // 첫 번째 화살표 이미지
+                    ),
+                    FadeTransition(
+                      opacity: _opacityAnimation2,
+                      child: Image.asset(
+                          'assets/images/arrow.png'), // 두 번째 화살표 이미지
+                    ),
+                    FadeTransition(
+                      opacity: _opacityAnimation3,
+                      child: Image.asset(
+                          'assets/images/arrow.png'), // 세 번째 화살표 이미지
+                    ),
+                  ],
+                ),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    // margin: const EdgeInsets.only(right: 100.0),
                     child: Image.asset('assets/images/icon_Left_m.png'),
                   ),
-                  Container(
-                    child: const Text(
-                      "M-Keeper",
-                      style: TextStyle(
-                        fontSize: 50,
-                        color: Color(0xF1EAF1),
-                      ),
+                  const Text(
+                    "M-Keeper",
+                    style: TextStyle(
+                      fontSize: 50,
+                      color: Color(0xF1EAF1),
                     ),
                   ),
                   Container(
-                    // margin: const EdgeInsets.only(left: 100.0),
                     child: Image.asset('assets/images/icon_Right_o.png'),
                   ),
                 ],
