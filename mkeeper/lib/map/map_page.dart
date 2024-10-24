@@ -58,6 +58,10 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
+  bool hasSpokenPauseFlag = false; // pauseFlag 안내 여부
+  bool hasSpokenPause = false; // pause 안내 여부
+  bool hasSpokenEnd = false; // end 안내 여부
+
   Future<void> _checkPauseStatus() async {
     final url = Uri.parse('https://mkeeper.ngrok.app/get_pause_status');
     try {
@@ -71,7 +75,34 @@ class _MapPageState extends State<MapPage> {
 
         print("Pause Status: flag=$pauseFlag, pause=$pause, end=$end");
 
-        // 상황에 맞게 상태 처리 (예: 일시 정지 상태라면 안내 음성을 추가로 말하는 등)
+        // flag가 True일 때 음성 안내 (한 번만)
+        if (pauseFlag == true && !hasSpokenPauseFlag) {
+          _speak("전방에 횡단보도가 있습니다. 잠시 정지해 주세요");
+          hasSpokenPauseFlag = true; // 안내가 나왔음을 기록
+        }
+
+        // pause가 True일 때 음성 안내 (한 번만)
+        if (pause == true && !hasSpokenPause) {
+          _speak("보행자 신호 입니다. 다시 출발하겠습니다.");
+          hasSpokenPause = true; // 안내가 나왔음을 기록
+        }
+
+        // end가 True일 때 음성 안내 (한 번만)
+        if (end == true && !hasSpokenEnd) {
+          _speak("목적지에 도착하였습니다. 길안내를 종료하겠습니다.");
+          hasSpokenEnd = true; // 안내가 나왔음을 기록
+        }
+
+        // 상태가 바뀔 때마다 안내를 재설정
+        if (pauseFlag == false) {
+          hasSpokenPauseFlag = false; // 다시 안내 가능하도록 설정
+        }
+        if (pause == false) {
+          hasSpokenPause = false; // 다시 안내 가능하도록 설정
+        }
+        if (end == false) {
+          hasSpokenEnd = false; // 다시 안내 가능하도록 설정
+        }
       } else {
         print('Failed to load pause status.');
       }
@@ -126,6 +157,7 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> _sendDestination(String destination) async {
     final url = Uri.parse('https://mkeeper.ngrok.app/api/destination');
+    _speak('$destination 까지 길안내를 시작합니다.');
     final response = await http.post(
       url,
       headers: {
@@ -135,7 +167,7 @@ class _MapPageState extends State<MapPage> {
         'destination': destination,
       }),
     );
-    _speak('$destination 까지 길안내를 시작합니다.');
+
     _fetchMapData();
   }
 
