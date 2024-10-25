@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mkeeper/map/map_page.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -15,6 +16,12 @@ Future<void> _speak(String text) async {
   await flutterTts.setLanguage("ko-KR");
   await flutterTts.setPitch(1.0);
   await flutterTts.speak(text);
+}
+
+final AudioPlayer _audioPlayer = AudioPlayer();
+
+Future<void> _playGuideVoice() async {
+  await _audioPlayer.play(AssetSource('tap_audio.mp3'));
 }
 
 class _MainPageState extends State<MainPage> {
@@ -33,8 +40,10 @@ class _MainPageState extends State<MainPage> {
           onTap: () {
             _speak(
                 "화면을 두번 터치하면 조작 화면으로 넘어가실 수 있습니다. 설명을 다시 듣고 싶으시면 화면을 한번 터치해 주세요.");
+            _playGuideVoice();
           },
           onDoubleTap: () {
+            _playGuideVoice();
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const DirectionPage()),
